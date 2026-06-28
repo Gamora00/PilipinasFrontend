@@ -1,0 +1,81 @@
+/* ============================================================
+   Global design tokens — Philippine flag palette.
+   Shared by every page (landing, register, …).
+   ============================================================ */
+:root {
+  --blue: #0038a8;
+  --blue-dark: #00298a;
+  --red: #ce1126;
+  --gold: #fcd116;
+  --gold-dark: #edc40c;
+  --green: #0e7a4b;
+  --green-dark: #0a6640;
+  --navy: #0b1b3a;
+  --ink: #0b1b3a;
+  --text: #4a5568;
+  --muted: #8a93a3;
+  --muted-2: #5b6577;
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --border: #e4e7ec;
+  --border-input: #d7dce3;
+  --border-soft: #eff1f4;
+  --font-head: 'Libre Franklin', sans-serif;
+  --font-body: 'Public Sans', system-ui, sans-serif;
+  --max: 1180px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+::selection { background: var(--gold); color: var(--navy); }
+
+/* ---------- Brand (shared across pages) ---------- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-decoration: none;
+}
+.brand__mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.brand__mark--sm { width: 30px; height: 30px; }
+.brand__dot { width: 11px; height: 11px; border-radius: 50%; background: var(--gold); }
+.brand__name {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 19px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.brand__name span { color: var(--blue); }
+
+/* ---------- Buttons (shared across pages) ---------- */
+.btn {
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.btn--primary {
+  display: inline-block;
+  background: var(--blue);
+  color: #fff;
+  font-size: 15px;
+  padding: 11px 20px;
+}
+.btn--primary:hover { background: var(--blue-dark); }
