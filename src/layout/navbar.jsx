@@ -1,13 +1,13 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-// Same-page scroll anchors stay plain <a>; route changes use <Link>.
+// `to` = router route (works from any page); `href` = same-page scroll anchor.
 const NAV_LINKS = [
-  { label: 'Mga Politiko', href: '#officials' },
-  { label: 'Paano Gumagana', href: '#how' },
-  { label: 'Angkenator', href: '#features' },
-  { label: 'Features', href: '#features' },
-  { label: 'Tungkol', href: '#about' },
+  { label: 'Politicians', to: '/politicians' },
+  { label: 'How It Works', href: '/#how' },
+  { label: 'Akinator ', href: '/#features' },
+  { label: 'Features', href: '/#features' },
+  { label: 'About', href: '/#about' },
 ]
 
 function Navbar() {
@@ -19,20 +19,26 @@ function Navbar() {
             <span className="brand__dot" />
           </span>
           <span className="brand__name">
-            pili<span>Pilinas</span>
+            Pili<span>Pinas</span>
           </span>
         </Link>
 
         <nav className="site-nav">
-          {NAV_LINKS.map((link) => (
-            <a key={link.label} href={link.href} className="site-nav__link">
-              {link.label}
-            </a>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.to ? (
+              <Link key={link.label} to={link.to} className="site-nav__link">
+                {link.label}
+              </Link>
+            ) : (
+              <a key={link.label} href={link.href} className="site-nav__link">
+                {link.label}
+              </a>
+            ),
+          )}
         </nav>
 
         <div className="site-header__actions">
-          <a href="#" className="link-plain">Mag-login</a>
+          <a href="#" className="link-plain">Log in</a>
         </div>
       </div>
     </header>

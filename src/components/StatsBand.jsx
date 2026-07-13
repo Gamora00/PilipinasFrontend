@@ -1,10 +1,10 @@
 import React from 'react'
 
 const STATS = [
-  { value: '12,400', accent: '+', label: 'Politiko na-track' },
-  { value: '85M', accent: '+', label: 'Botanteng Pilipino' },
+  { value: '12,400', accent: '+', label: 'Politicians tracked' },
+  { value: '85M', accent: '+', label: 'Filipino voters' },
   { value: '100', accent: '%', label: 'Public records' },
-  { value: 'Daily', accent: '', label: 'Na-uupdate' },
+  { value: 'Daily', accent: '', label: 'Updated' },
 ]
 
 function StatsBand() {

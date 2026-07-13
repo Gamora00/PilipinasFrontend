@@ -4,7 +4,7 @@ const FEATURES = [
   {
     variant: 'blue',
     title: 'Voting Records',
-    text: 'Bawat boto sa bawat panukala, naka-log at searchable.',
+    text: 'Every vote on every measure, logged and searchable.',
     icon: (
       <>
         <path d="M9 11l3 3L22 4" />
@@ -15,7 +15,7 @@ const FEATURES = [
   {
     variant: 'red',
     title: 'Promise Tracker',
-    text: 'Natupad ba ang mga pangako noong campaign? Alamin.',
+    text: 'Were campaign promises kept? Find out.',
     icon: (
       <>
         <circle cx="12" cy="12" r="10" />
@@ -26,7 +26,7 @@ const FEATURES = [
   {
     variant: 'gold',
     title: 'SALN, Simplified',
-    text: 'Asset declarations na madaling basahin at i-compare.',
+    text: 'Asset declarations that are easy to read and compare.',
     icon: (
       <>
         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -37,7 +37,7 @@ const FEATURES = [
   {
     variant: 'navy',
     title: 'Side-by-Side',
-    text: 'I-compare ang mga kandidato nang magkatabi, instantly.',
+    text: 'Compare candidates side-by-side, instantly.',
     icon: (
       <>
         <line x1="18" y1="20" x2="18" y2="10" />
@@ -53,13 +53,13 @@ function Features() {
     <section id="features" className="features">
       <div className="features__inner">
         <div className="features__intro">
-          <div className="section-head__eyebrow">Ang laman</div>
+          <div className="section-head__eyebrow">What's inside</div>
           <h2 className="features__title">
-            Lahat ng kailangan mong malaman, sa isang profile.
+            Everything you need to know, in one profile.
           </h2>
           <p className="features__text">
-            Hindi opinyon. Hindi propaganda. Datos lang na galing sa opisyal na
-            records ng gobyerno, organisado para madali mong maintindihan.
+            Not opinion. Not propaganda. Just data from official government
+            records, organized so it's easy to understand.
           </p>
         </div>
 

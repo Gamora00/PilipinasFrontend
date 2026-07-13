@@ -1,31 +1,94 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import '../style/register.css'
 
-const STEP_LABELS = ['Personal', 'Candidacy', 'Issues', 'Documents', 'Review']
+const NEW_SLATE = '__new__'
+
+const STEP_LABELS = ['Personal', 'Residence & Voter', 'Profile', 'Documents', 'Review']
 const TOTAL_STEPS = STEP_LABELS.length
 
-const ISSUES = [
-  { id: 'wage',      issue: 'Economy',        text: 'Raise the minimum wage' },
-  { id: 'college',   issue: 'Education',      text: 'Free college for all' },
-  { id: 'mining',    issue: 'Environment',    text: 'Pause new mining' },
-  { id: 'transport', issue: 'Transportation', text: 'Prioritize public transport' },
-  { id: 'health',    issue: 'Health',         text: 'More funding for public hospitals' },
-  { id: 'divorce',   issue: 'Rights',         text: 'Legalize divorce' },
+// COC scope (COMELEC Resolution 9740, Sec. 1):
+//   Barangay: 1 Punong Barangay + 7 Sangguniang Barangay Members
+//   SK:       1 Chairman + 7 Sangguniang Kabataan Members
+const POSITIONS = [
+  'Punong Barangay',
+  'Sangguniang Barangay Member',
+  'SK Chairman',
+  'SK Kagawad',
+]
+
+const SK_POSITIONS = ['SK Chairman', 'SK Kagawad']
+
+// Age qualification per office (COMELEC Resolution 9740, Sec. 2).
+function ageHint(position) {
+  if (SK_POSITIONS.includes(position)) {
+    return 'SK candidates must be at least 15 but below 18 years old on election day.'
+  }
+  if (position) {
+    return 'Must be at least 18 years old and a registered voter of the barangay.'
+  }
+  return ''
+}
+
+const ADVOCACIES = [
+  'Anti-Corruption', 'Education', 'Healthcare', 'Jobs & Economy', 'Agriculture',
+  'Environment & Climate', 'Infrastructure', 'Public Safety', 'Housing',
+  'Women & Children', 'Youth', 'OFW Welfare', 'Indigenous Peoples', 'Disaster Resilience',
 ]
 
 const UPLOADS = [
-  { id: 'coc',   label: 'Certificate of Candidacy (COC)', sub: 'Filed with COMELEC — required' },
-  { id: 'id',    label: 'Government ID', sub: "Driver's license, passport, or PRC ID" },
-  { id: 'photo', label: 'Official campaign photo', sub: 'Hi-res, formal shot' },
+  { id: 'coc', label: 'Certificate of Candidacy (COC)', sub: 'Signed & notarized — required' },
+  { id: 'id', label: 'Government ID', sub: "Driver's license, passport, or PRC ID" },
+  { id: 'photo', label: 'Official photo', sub: 'Hi-res, formal shot' },
 ]
 
 const EMPTY_FORM = {
-  name: '', email: '', phone: '', party: '',
-  role: '', region: '', electionYear: '', ballotNumber: '', platform: '', consent: false,
+  // Name (COC 1–2)
+  firstName: '', middleName: '', lastName: '', nameExtension: '', nickname: '',
+  // Personal (COC 12–17)
+  sex: '', dob: '', pobCity: '', pobProvince: '', civilStatus: '', spouseName: '',
+  profession: '', email: '', mobile: '', altPhone: '',
+  // Residence / address (COC 3)
+  addrHouse: '', addrStreet: '', addrBrgy: '', addrCity: '', addrProvince: '',
+  addrRegion: '', addrZip: '',
+  // Address for election purposes (COC 4)
+  sameElectionAddress: true, electionAddress: '',
+  // Office + election
+  position: '', electionYear: '',
+  // Group / slate (informal team — BSKE is nonpartisan)
+  slateId: '', slateName: '',
+  // Period of residence (COC 5)
+  resPhYears: '', resPhMonths: '', resBrgyYears: '', resBrgyMonths: '',
+  // Registered voter (COC 18)
+  voterPrecinct: '', voterBarangay: '', voterCity: '', voterProvince: '',
+  // Public profile (platform extras)
+  advocacies: [], platform: '',
+  // Oath / declarations (COC 6–10)
+  consent: false,
 }
 
-/* ---------------- Sub-components ---------------- */
+function fullName(f) {
+  return [f.firstName, f.middleName, f.lastName, f.nameExtension].filter(Boolean).join(' ')
+}
+
+function residenceLine(f) {
+  return [f.addrHouse, f.addrStreet, f.addrBrgy, f.addrCity, f.addrProvince, f.addrZip]
+    .filter(Boolean)
+    .join(', ')
+}
+
+function computeAge(dob) {
+  if (!dob) return ''
+  const birth = new Date(dob)
+  if (Number.isNaN(birth.getTime())) return ''
+  const now = new Date()
+  let age = now.getFullYear() - birth.getFullYear()
+  const monthDiff = now.getMonth() - birth.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birth.getDate())) age--
+  return age >= 0 ? String(age) : ''
+}
+
+/* ---------------- Primitives ---------------- */
 
 function Stepper({ step }) {
   return (
@@ -67,96 +130,65 @@ function Field({ label, value, onChange, placeholder, type = 'text' }) {
   )
 }
 
-function StepPersonal({ f, set }) {
+function SelectField({ label, value, onChange, children }) {
   return (
-    <div>
-      <h2 className="step__title">Personal information</h2>
-      <div className="field-grid">
-        <Field label="Full name *" value={f.name} onChange={set('name')} placeholder="e.g. Maria S. Delgado" />
-        <Field label="Email *" type="email" value={f.email} onChange={set('email')} placeholder="office@email.gov.ph" />
-        <Field label="Phone number" value={f.phone} onChange={set('phone')} placeholder="(02) 8XXX-XXXX" />
-        <Field label="Party" value={f.party} onChange={set('party')} placeholder="e.g. Independent" />
-      </div>
-    </div>
+    <label className="field">
+      <span className="field__label">{label}</span>
+      <select className="field__select" value={value} onChange={onChange}>
+        {children}
+      </select>
+    </label>
   )
 }
 
-function StepCandidacy({ f, set }) {
-  return (
-    <div>
-      <h2 className="step__title step__title--tight">Candidacy details</h2>
-      <p className="step__hint">Tell voters what you are running for in the upcoming election.</p>
-      <div className="field-grid">
-        <label className="field">
-          <span className="field__label">Position you're seeking *</span>
-          <select className="field__select" value={f.role} onChange={set('role')}>
-            <option value="">Select a position…</option>
-            <option value="President">President</option>
-            <option value="Vice President">Vice President</option>
-            <option value="Senator">Senator</option>
-            <option value="Congressman">Congressman / Congresswoman</option>
-            <option value="Governor">Governor</option>
-            <option value="Mayor">Mayor</option>
-            <option value="Councilor">Councilor</option>
-            <option value="Barangay Captain">Barangay Captain</option>
-          </select>
-        </label>
-        <Field label="Region / District *" value={f.region} onChange={set('region')} placeholder="e.g. Cebu City" />
-        <Field label="Election year *" value={f.electionYear} onChange={set('electionYear')} placeholder="e.g. 2028" />
-        <Field label="Ballot / Candidate number" value={f.ballotNumber} onChange={set('ballotNumber')} placeholder="e.g. 12" />
-      </div>
-      <label className="field field--full">
-        <span className="field__label">Platform &amp; agenda</span>
-        <textarea
-          className="field__textarea"
-          rows={4}
-          value={f.platform}
-          onChange={set('platform')}
-          placeholder="Describe your campaign platform, priorities, and what you'll fight for if elected…"
-        />
-      </label>
-    </div>
-  )
+// Repeatable list of objects (track record).
+function useList(blank) {
+  const [items, setItems] = useState([])
+  return {
+    items,
+    add: () => setItems((p) => [...p, { ...blank }]),
+    change: (i, key, val) => setItems((p) => p.map((it, idx) => (idx === i ? { ...it, [key]: val } : it))),
+    remove: (i) => setItems((p) => p.filter((_, idx) => idx !== i)),
+    reset: () => setItems([]),
+  }
 }
 
-function StepIssues({ stances, setStance }) {
+function RepeatableSection({ title, hint, addLabel, fields, list }) {
   return (
-    <div>
-      <h2 className="step__title step__title--tight">Stance on issues</h2>
-      <p className="step__hint">Set your official stance. This is used for Angkenator matching.</p>
-      <div className="stance-list">
-        {ISSUES.map((it) => {
-          const v = stances[it.id]
-          return (
-            <div key={it.id} className="stance-row">
-              <div style={{ minWidth: 0 }}>
-                <div className="stance-row__issue">{it.issue}</div>
-                <div className="stance-row__text">{it.text}</div>
-              </div>
-              <div className="stance-row__actions">
-                <button
-                  className={`stance-btn stance-btn--agree${v === 'a' ? ' is-active' : ''}`}
-                  onClick={() => setStance(it.id, 'a')}
-                >
-                  Agree
-                </button>
-                <button
-                  className={`stance-btn stance-btn--neutral${v === 'n' ? ' is-active' : ''}`}
-                  onClick={() => setStance(it.id, 'n')}
-                >
-                  Neutral
-                </button>
-                <button
-                  className={`stance-btn stance-btn--disagree${v === 'd' ? ' is-active' : ''}`}
-                  onClick={() => setStance(it.id, 'd')}
-                >
-                  Disagree
-                </button>
-              </div>
+    <div className="track-section">
+      <div className="track-section__head">
+        <h3 className="track-section__title">{title}</h3>
+        <button type="button" className="track-add" onClick={list.add}>+ {addLabel}</button>
+      </div>
+      {hint && <p className="track-section__hint">{hint}</p>}
+      {list.items.length === 0 ? (
+        <p className="track-empty">None added yet.</p>
+      ) : (
+        list.items.map((item, i) => (
+          <div className="track-row" key={i}>
+            <div className="track-row__fields">
+              {fields.map((fld) => (
+                <input
+                  key={fld.key}
+                  className="field__control"
+                  style={{ flex: fld.width || 1 }}
+                  placeholder={fld.placeholder}
+                  value={item[fld.key]}
+                  onChange={(e) => list.change(i, fld.key, e.target.value)}
+                />
+              ))}
             </div>
-          )
-        })}
-      </div>
+            <button
+              type="button"
+              className="track-remove"
+              onClick={() => list.remove(i)}
+              aria-label="Remove entry"
+            >
+              ×
+            </button>
+          </div>
+        ))
+      )}
     </div>
   )
 }
@@ -173,6 +205,205 @@ const UploadIcon = () => (
     <line x1="12" y1="3" x2="12" y2="15" />
   </svg>
 )
+
+/* ---------------- Steps ---------------- */
+
+function StepPersonal({ f, set }) {
+  const age = computeAge(f.dob)
+  return (
+    <div>
+      <h2 className="step__title">Personal information</h2>
+      <h3 className="step__subhead">Name</h3>
+      <div className="field-grid">
+        <Field label="Last name *" value={f.lastName} onChange={set('lastName')} placeholder="e.g. Delgado" />
+        <Field label="First name *" value={f.firstName} onChange={set('firstName')} placeholder="e.g. Maria" />
+        <Field label="Middle name" value={f.middleName} onChange={set('middleName')} placeholder="e.g. Santos" />
+        <Field label="Name extension" value={f.nameExtension} onChange={set('nameExtension')} placeholder="Jr., Sr., III" />
+        <Field label="Nickname / stage name (on ballot)" value={f.nickname} onChange={set('nickname')} placeholder="One name only" />
+      </div>
+
+      <h3 className="step__subhead">Details</h3>
+      <div className="field-grid">
+        <SelectField label="Gender *" value={f.sex} onChange={set('sex')}>
+          <option value="">Select…</option>
+          <option>Male</option>
+          <option>Female</option>
+        </SelectField>
+        <Field label="Date of birth *" type="date" value={f.dob} onChange={set('dob')} />
+        <label className="field">
+          <span className="field__label">Age</span>
+          <input className="field__control" value={age} placeholder="Auto-computed" readOnly disabled />
+        </label>
+        <Field label="Place of birth — City / Municipality" value={f.pobCity} onChange={set('pobCity')} placeholder="e.g. Cebu City" />
+        <Field label="Place of birth — Province" value={f.pobProvince} onChange={set('pobProvince')} placeholder="e.g. Cebu" />
+        <SelectField label="Civil status *" value={f.civilStatus} onChange={set('civilStatus')}>
+          <option value="">Select…</option>
+          <option>Single</option>
+          <option>Married</option>
+          <option>Widowed</option>
+        </SelectField>
+        {f.civilStatus === 'Married' && (
+          <Field label="Full name of spouse" value={f.spouseName} onChange={set('spouseName')} placeholder="Spouse's full name" />
+        )}
+        <Field label="Profession / occupation" value={f.profession} onChange={set('profession')} placeholder="e.g. Teacher" />
+      </div>
+
+      <h3 className="step__subhead">Contact</h3>
+      <div className="field-grid">
+        <Field label="Email *" type="email" value={f.email} onChange={set('email')} placeholder="name@email.com" />
+        <Field label="Mobile # *" type="tel" value={f.mobile} onChange={set('mobile')} placeholder="0917 XXX XXXX" />
+        <Field label="Alternative #" type="tel" value={f.altPhone} onChange={set('altPhone')} placeholder="(02) 8XXX-XXXX" />
+      </div>
+    </div>
+  )
+}
+
+function StepResidenceVoter({ f, set, slates }) {
+  return (
+    <div>
+      <h2 className="step__title step__title--tight">Candidacy, residence &amp; voter info</h2>
+      <p className="step__hint">As required on the Certificate of Candidacy.</p>
+
+      <h3 className="step__subhead">Office sought</h3>
+      <div className="field-grid">
+        <SelectField label="Position *" value={f.position} onChange={set('position')}>
+          <option value="">Select a position…</option>
+          {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+        </SelectField>
+        <Field label="Election year *" value={f.electionYear} onChange={set('electionYear')} placeholder="e.g. 2028" />
+        <SelectField label="Group / Slate (optional)" value={f.slateId} onChange={set('slateId')}>
+          <option value="">No group / independent</option>
+          {slates.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+          <option value={NEW_SLATE}>+ Create a new group…</option>
+        </SelectField>
+        {f.slateId === NEW_SLATE && (
+          <Field label="New group name" value={f.slateName} onChange={set('slateName')} placeholder="e.g. Team Kaunlaran" />
+        )}
+      </div>
+      {f.position && <p className="step__note">{ageHint(f.position)}</p>}
+
+      <h3 className="step__subhead">Residence / address</h3>
+      <div className="field-grid">
+        <Field label="House No. / Street / Subdivision" value={f.addrHouse} onChange={set('addrHouse')} placeholder="e.g. 123 Rizal St." />
+        <Field label="Barangay *" value={f.addrBrgy} onChange={set('addrBrgy')} placeholder="e.g. Brgy. San Antonio" />
+        <Field label="City / Municipality *" value={f.addrCity} onChange={set('addrCity')} placeholder="e.g. Pasig" />
+        <Field label="Province *" value={f.addrProvince} onChange={set('addrProvince')} placeholder="e.g. Metro Manila" />
+        <Field label="Region" value={f.addrRegion} onChange={set('addrRegion')} placeholder="e.g. NCR" />
+        <Field label="ZIP code" value={f.addrZip} onChange={set('addrZip')} placeholder="e.g. 1600" />
+      </div>
+      <label className="consent consent--inline">
+        <input type="checkbox" checked={f.sameElectionAddress} onChange={set('sameElectionAddress')} />
+        <span>Address for election purposes is the same as my residence address.</span>
+      </label>
+      {!f.sameElectionAddress && (
+        <label className="field field--full">
+          <span className="field__label">Address for election purposes</span>
+          <input className="field__control" value={f.electionAddress} onChange={set('electionAddress')} placeholder="Mailing address for election notices" />
+        </label>
+      )}
+
+      <h3 className="step__subhead">Period of residence (before election day)</h3>
+      <div className="field-grid">
+        <Field label="In the Philippines — Years" type="number" value={f.resPhYears} onChange={set('resPhYears')} placeholder="e.g. 30" />
+        <Field label="In the Philippines — Months" type="number" value={f.resPhMonths} onChange={set('resPhMonths')} placeholder="e.g. 0" />
+        <Field label="In the barangay — Years" type="number" value={f.resBrgyYears} onChange={set('resBrgyYears')} placeholder="e.g. 5" />
+        <Field label="In the barangay — Months" type="number" value={f.resBrgyMonths} onChange={set('resBrgyMonths')} placeholder="e.g. 0" />
+      </div>
+
+      <h3 className="step__subhead">Registered voter of</h3>
+      <div className="field-grid">
+        <Field label="Precinct No." value={f.voterPrecinct} onChange={set('voterPrecinct')} placeholder="e.g. 0123A" />
+        <Field label="Barangay" value={f.voterBarangay} onChange={set('voterBarangay')} placeholder="e.g. Brgy. San Antonio" />
+        <Field label="City / Municipality" value={f.voterCity} onChange={set('voterCity')} placeholder="e.g. Pasig" />
+        <Field label="Province" value={f.voterProvince} onChange={set('voterProvince')} placeholder="e.g. Metro Manila" />
+      </div>
+    </div>
+  )
+}
+
+function StepProfile({ f, set, toggleAdvocacy, education, bills, achievements, experience }) {
+  return (
+    <div>
+      <h2 className="step__title step__title--tight">Public profile</h2>
+      <p className="step__hint">Optional — shown on the candidate's transparency profile (not part of the COC).</p>
+
+      <label className="field field--full">
+        <span className="field__label">Platform &amp; agenda</span>
+        <textarea
+          className="field__textarea"
+          rows={4}
+          value={f.platform}
+          onChange={set('platform')}
+          placeholder="Describe your platform, priorities, and what you'll fight for if elected…"
+        />
+      </label>
+
+      <div className="field field--full" style={{ marginTop: 18 }}>
+        <span className="field__label">
+          Advocacies <span className="field__hint-inline">— select all that apply</span>
+        </span>
+        <div className="chip-group">
+          {ADVOCACIES.map((opt) => {
+            const selected = f.advocacies.includes(opt)
+            return (
+              <button
+                type="button"
+                key={opt}
+                className={`chip${selected ? ' is-selected' : ''}`}
+                aria-pressed={selected}
+                onClick={() => toggleAdvocacy(opt)}
+              >
+                {opt}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <h3 className="step__subhead">Track record</h3>
+      <RepeatableSection
+        title="Educational background"
+        addLabel="Add education"
+        list={education}
+        fields={[
+          { key: 'school', placeholder: 'School / Institution', width: 2 },
+          { key: 'degree', placeholder: 'Degree / Level', width: 2 },
+          { key: 'year', placeholder: 'Year', width: 1 },
+        ]}
+      />
+      <RepeatableSection
+        title="Authored / passed bills"
+        hint="For incumbents or re-electionists."
+        addLabel="Add bill"
+        list={bills}
+        fields={[
+          { key: 'title', placeholder: 'Bill title', width: 2 },
+          { key: 'year', placeholder: 'Year', width: 1 },
+          { key: 'description', placeholder: 'Short description', width: 3 },
+        ]}
+      />
+      <RepeatableSection
+        title="Past achievements & awards"
+        addLabel="Add achievement"
+        list={achievements}
+        fields={[
+          { key: 'title', placeholder: 'Achievement / Award', width: 3 },
+          { key: 'year', placeholder: 'Year', width: 1 },
+        ]}
+      />
+      <RepeatableSection
+        title="Work / career experience"
+        addLabel="Add experience"
+        list={experience}
+        fields={[
+          { key: 'position', placeholder: 'Position', width: 2 },
+          { key: 'organization', placeholder: 'Organization', width: 2 },
+          { key: 'years', placeholder: 'Years (e.g. 2016–2019)', width: 2 },
+        ]}
+      />
+    </div>
+  )
+}
 
 function StepDocuments({ uploads, addUpload, f, set }) {
   return (
@@ -191,9 +422,7 @@ function StepDocuments({ uploads, addUpload, f, set }) {
               <span className="upload-row__icon">{done ? <CheckIcon /> : <UploadIcon />}</span>
               <div className="upload-row__body">
                 <div className="upload-row__label">{u.label}</div>
-                <div className="upload-row__sub">
-                  {done ? `Uploaded · ${uploads[u.id]}` : u.sub}
-                </div>
+                <div className="upload-row__sub">{done ? `Uploaded · ${uploads[u.id]}` : u.sub}</div>
               </div>
               <span className="upload-row__action">{done ? 'Replace' : 'Upload'}</span>
             </div>
@@ -203,9 +432,11 @@ function StepDocuments({ uploads, addUpload, f, set }) {
       <label className="consent">
         <input type="checkbox" checked={f.consent} onChange={set('consent')} />
         <span>
-          I certify that I am a duly filed candidate and that all information provided is
-          true and correct, and I agree to piliPilinas'{' '}
-          <a href="#">Terms</a> and <a href="#">Data Policy</a>.
+          I am a Filipino citizen; I am not a permanent resident of, or an immigrant to, a
+          foreign country; I am eligible for the office I seek; I will file my Statement of
+          Contributions and Expenditures (SOCE) within 30 days after election day; and I will
+          support and defend the Constitution. I certify that all information given is true and
+          correct.
         </span>
       </label>
     </div>
@@ -221,19 +452,36 @@ function ReviewCell({ label, value }) {
   )
 }
 
-function StepReview({ f, stanceCount }) {
+function StepReview({ f, counts, group }) {
+  const trackRecord = [
+    counts.education && `${counts.education} education`,
+    counts.bills && `${counts.bills} bills`,
+    counts.achievements && `${counts.achievements} achievements`,
+    counts.experience && `${counts.experience} experience`,
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
   return (
     <div>
       <h2 className="step__title">Review before submitting</h2>
       <div className="review-grid">
-        <ReviewCell label="Name" value={f.name} />
-        <ReviewCell label="Email" value={f.email} />
-        <ReviewCell label="Running for" value={f.role} />
-        <ReviewCell label="Region / District" value={f.region} />
+        <ReviewCell label="Full name" value={fullName(f)} />
+        <ReviewCell label="Nickname" value={f.nickname} />
+        <ReviewCell label="Running for" value={f.position} />
+        <ReviewCell label="Group / Slate" value={group} />
         <ReviewCell label="Election year" value={f.electionYear} />
-        <ReviewCell label="Party" value={f.party} />
-        <ReviewCell label="Ballot number" value={f.ballotNumber} />
-        <ReviewCell label="Issue stances set" value={`${stanceCount} / ${ISSUES.length}`} />
+        <ReviewCell label="Gender" value={f.sex} />
+        <ReviewCell label="Date of birth" value={f.dob} />
+        <ReviewCell label="Place of birth" value={[f.pobCity, f.pobProvince].filter(Boolean).join(', ')} />
+        <ReviewCell label="Civil status" value={f.civilStatus} />
+        <ReviewCell label="Profession" value={f.profession} />
+        <ReviewCell label="Residence" value={residenceLine(f)} />
+        <ReviewCell label="Registered voter of" value={[f.voterBarangay, f.voterCity, f.voterProvince].filter(Boolean).join(', ')} />
+        <ReviewCell label="Email" value={f.email} />
+        <ReviewCell label="Mobile #" value={f.mobile} />
+        <ReviewCell label="Advocacies" value={f.advocacies.join(', ')} />
+        <ReviewCell label="Track record" value={trackRecord} />
       </div>
       <div className="review-note">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#A8820B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -242,8 +490,8 @@ function StepReview({ f, stanceCount }) {
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
         <span>
-          After submitting, our verification team will review your application within{' '}
-          <strong>3–5 days</strong>.
+          After submitting, the candidacy is <strong>listed on the platform right away</strong>.
+          You can edit or remove it anytime from the admin console.
         </span>
       </div>
     </div>
@@ -256,26 +504,90 @@ function Register() {
   const [stage, setStage] = useState('form') // 'form' | 'done'
   const [step, setStep] = useState(1)
   const [f, setForm] = useState(EMPTY_FORM)
-  const [stances, setStances] = useState({})
   const [uploads, setUploads] = useState({})
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const [slates, setSlates] = useState([])
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/candidacy/slates')
+      .then((r) => r.json())
+      .then((d) => setSlates(Array.isArray(d) ? d : []))
+      .catch(() => {})
+  }, [])
+
+  const education = useList({ school: '', degree: '', year: '' })
+  const bills = useList({ title: '', year: '', description: '' })
+  const achievements = useList({ title: '', year: '' })
+  const experience = useList({ position: '', organization: '', years: '' })
 
   const set = (key) => (e) =>
     setForm((prev) => ({
       ...prev,
-      [key]: key === 'consent' ? e.target.checked : e.target.value,
+      [key]: key === 'consent' || key === 'sameElectionAddress' ? e.target.checked : e.target.value,
     }))
 
-  const setStance = (id, value) => setStances((prev) => ({ ...prev, [id]: value }))
+  const toggleAdvocacy = (val) =>
+    setForm((prev) => ({
+      ...prev,
+      advocacies: prev.advocacies.includes(val)
+        ? prev.advocacies.filter((a) => a !== val)
+        : [...prev.advocacies, val],
+    }))
+
   const addUpload = (id) => setUploads((prev) => ({ ...prev, [id]: `${id}_document.pdf` }))
 
   const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS))
   const back = () => setStep((s) => Math.max(s - 1, 1))
 
+  const handleSubmit = async () => {
+    setSubmitting(true)
+    setError('')
+    const creatingSlate = f.slateId === NEW_SLATE
+    const payload = {
+      ...f,
+      slateId: creatingSlate ? null : f.slateId || null,
+      slateName: creatingSlate ? f.slateName : null,
+      electionAddress: f.sameElectionAddress ? residenceLine(f) : f.electionAddress,
+      cocDocument: uploads.coc || null,
+      governmentId: uploads.id || null,
+      campaignPhoto: uploads.photo || null,
+      education: education.items,
+      bills: bills.items,
+      achievements: achievements.items,
+      experience: experience.items,
+    }
+    try {
+      const res = await fetch('http://localhost:5000/api/candidacy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || 'Submission failed. Please try again.')
+      }
+      setStage('done')
+    } catch (e) {
+      setError(
+        e.message === 'Failed to fetch'
+          ? 'Cannot reach the server. Is the backend running on port 5000?'
+          : e.message,
+      )
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const reset = () => {
     setForm(EMPTY_FORM)
-    setStances({})
     setUploads({})
+    education.reset()
+    bills.reset()
+    achievements.reset()
+    experience.reset()
     setStep(1)
+    setError('')
     setStage('form')
   }
 
@@ -288,11 +600,10 @@ function Register() {
               <polyline points="20 6 9 17 4 12" />
             </svg>
           </div>
-          <h1 className="register-success__title">Candidacy submitted!</h1>
+          <h1 className="register-success__title">Candidacy registered!</h1>
           <p className="register-success__text">
-            Thank you, <strong>{f.name || 'candidate'}</strong>. We've received your
-            candidacy application. We'll email <strong>{f.email || 'your inbox'}</strong>{' '}
-            within 3–5 days with the verification result.
+            <strong>{fullName(f) || 'The candidate'}</strong> is now listed on the platform.
+            You can find them on the Politicians page right away.
           </p>
           <div className="register-success__actions">
             <Link to="/admin" className="register-success__home">Back to admin</Link>
@@ -302,8 +613,6 @@ function Register() {
       </div>
     )
   }
-
-  const stanceCount = Object.keys(stances).length
 
   return (
     <div className="register">
@@ -319,11 +628,11 @@ function Register() {
 
       <div className="register__shell">
         <div className="register__intro">
-          <span className="register__eyebrow">Candidacy Form · For Candidates</span>
-          <h1 className="register__title">Register your candidacy</h1>
+          <span className="register__eyebrow">Certificate of Candidacy · Barangay &amp; SK</span>
+          <h1 className="register__title">Register a candidacy</h1>
           <p className="register__subtitle">
-            File your candidacy on the transparency platform. Our team verifies every
-            application against COMELEC records before publishing.
+            File a candidacy for Punong Barangay or Sangguniang Kabataan. Fields follow the
+            official COMELEC Certificate of Candidacy.
           </p>
         </div>
 
@@ -331,21 +640,48 @@ function Register() {
 
         <div className="register-card">
           {step === 1 && <StepPersonal f={f} set={set} />}
-          {step === 2 && <StepCandidacy f={f} set={set} />}
-          {step === 3 && <StepIssues stances={stances} setStance={setStance} />}
+          {step === 2 && <StepResidenceVoter f={f} set={set} slates={slates} />}
+          {step === 3 && (
+            <StepProfile
+              f={f}
+              set={set}
+              toggleAdvocacy={toggleAdvocacy}
+              education={education}
+              bills={bills}
+              achievements={achievements}
+              experience={experience}
+            />
+          )}
           {step === 4 && <StepDocuments uploads={uploads} addUpload={addUpload} f={f} set={set} />}
-          {step === 5 && <StepReview f={f} stanceCount={stanceCount} />}
+          {step === 5 && (
+            <StepReview
+              f={f}
+              group={
+                f.slateId === NEW_SLATE
+                  ? f.slateName
+                  : slates.find((s) => String(s.id) === String(f.slateId))?.name || ''
+              }
+              counts={{
+                education: education.items.length,
+                bills: bills.items.length,
+                achievements: achievements.items.length,
+                experience: experience.items.length,
+              }}
+            />
+          )}
+
+          {error && <p className="form-error">{error}</p>}
 
           <div className="form-nav">
-            <button className="btn-back" onClick={back} disabled={step === 1}>
+            <button className="btn-back" onClick={back} disabled={step === 1 || submitting}>
               ← Back
             </button>
             <span className="form-nav__count">Step {step} / {TOTAL_STEPS}</span>
             {step < TOTAL_STEPS ? (
               <button className="btn-next" onClick={next}>Continue →</button>
             ) : (
-              <button className="btn-submit" onClick={() => setStage('done')}>
-                Submit application
+              <button className="btn-submit" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? 'Submitting…' : 'Submit candidacy'}
               </button>
             )}
           </div>

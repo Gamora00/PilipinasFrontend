@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom'
 const COLUMNS = [
   {
     title: 'Platform',
-    links: ['Mga Politiko', 'Compare', 'Election Data'],
+    links: ['Politicians', 'Compare', 'Election Data'],
   },
   {
-    title: 'Tungkol',
-    links: ['Aming Misyon', 'Data Sources', 'Makipag-ugnayan'],
+    title: 'About',
+    links: ['Our Mission', 'Data Sources', 'Contact'],
   },
   {
     title: 'Legal',
@@ -30,8 +30,8 @@ function Footer() {
             </span>
           </Link>
           <p className="footer__about">
-            Isang nonpartisan na platform para sa transparency at accountability
-            sa pulitika ng Pilipinas.
+            A nonpartisan platform for transparency and accountability in
+            Philippine politics.
           </p>
         </div>
 
@@ -49,7 +49,7 @@ function Footer() {
 
       <div className="footer__bar">
         <div className="footer__bar-inner">
-          <span>© 2026 piliPilinas. Para sa bayan.</span>
+          <span>© 2026 piliPilinas. For the nation.</span>
           <span className="flag-dots flag-dots--lg">
             <span style={{ background: '#0038A8' }} />
             <span style={{ background: '#CE1126' }} />

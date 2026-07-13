@@ -14,6 +14,9 @@ function OfficialCard({ official }) {
   return (
     <Link to={`/profile/${official.slug}`} className="official-card">
       <div className="official-card__photo">
+        {official.ballotNumber != null && (
+          <span className="official-card__ballot">#{official.ballotNumber}</span>
+        )}
         <span>official photo</span>
       </div>
       <span className="official-card__role">{official.role}</span>
@@ -22,9 +25,9 @@ function OfficialCard({ official }) {
         {official.party} · {official.region}
       </p>
       <div className="official-card__stats">
-        <Stat value={official.attendance} label="Attendance" />
         <Stat value={official.bills} label="Bills filed" />
-        <Stat value={official.promises} label="Promises kept" />
+        <Stat value={official.advocacies} label="Advocacies" />
+        <Stat value={official.electionYear} label="Election" />
       </div>
     </Link>
   )

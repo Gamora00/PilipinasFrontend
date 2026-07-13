@@ -4,20 +4,20 @@ const STEPS = [
   {
     n: '1',
     variant: 'blue',
-    title: 'Hanapin',
-    text: 'I-type ang pangalan ng kahit sinong opisyal — mula barangay captain hanggang senador.',
+    title: 'Search',
+    text: 'Type the name of any official — from barangay captain to senator.',
   },
   {
     n: '2',
     variant: 'red',
-    title: 'Suriin',
-    text: 'Tingnan ang voting record, attendance, SALN, at mga naipasang batas — walang spin.',
+    title: 'Review',
+    text: 'See voting records, attendance, SALN, and passed bills — no spin.',
   },
   {
     n: '3',
     variant: 'gold',
-    title: 'Pumili',
-    text: 'Mag-compare side-by-side at magdesisyon base sa facts — hindi sa ads o sayaw.',
+    title: 'Decide',
+    text: 'Compare side-by-side and decide based on facts — not ads or dance numbers.',
   },
 ]
 
@@ -25,8 +25,8 @@ function HowItWorks() {
   return (
     <section id="how" className="how">
       <div className="section-head section-head--center">
-        <div className="section-head__eyebrow">Paano gumagana</div>
-        <h2 className="section-head__title">Tatlong hakbang lang.</h2>
+        <div className="section-head__eyebrow">How it works</div>
+        <h2 className="section-head__title">Just three steps.</h2>
       </div>
       <div className="how__grid">
         {STEPS.map((step) => (

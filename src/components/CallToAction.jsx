@@ -5,11 +5,11 @@ function CallToAction() {
     <section id="cta" className="cta">
       <div className="cta__card">
         <h2 className="cta__title">
-          Handa nang mag-research<br />bago mag-vote?
+          Ready to research<br />before you vote?
         </h2>
         <p className="cta__text">
-          Mag-sign up para sa libreng access at updates tuwing may bagong
-          election data.
+          Sign up for free access and updates whenever new election data is
+          available.
         </p>
         <form
           className="cta__form"
@@ -17,11 +17,11 @@ function CallToAction() {
         >
           <input
             type="email"
-            placeholder="Ilagay ang iyong email"
+            placeholder="Enter your email"
             className="cta__input"
             aria-label="Email address"
           />
-          <button type="submit" className="btn btn--gold">Mag-sign up</button>
+          <button type="submit" className="btn btn--gold">Sign up</button>
         </form>
       </div>
     </section>

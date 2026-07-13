@@ -25,13 +25,13 @@ function Profile() {
               <span className="brand__mark"><span className="brand__dot" /></span>
               <span className="brand__name">pili<span>Pilinas</span></span>
             </Link>
-            <Link to="/" className="profile-header__back">← Bumalik sa home</Link>
+            <Link to="/" className="profile-header__back">← Back to home</Link>
           </div>
         </header>
         <div className="profile-missing">
-          <h1>Walang nahanap na opisyal.</h1>
-          <p>Maaaring mali ang link o tinanggal na ang profile na ito.</p>
-          <Link to="/" className="btn btn--primary">Bumalik sa home</Link>
+          <h1>Official not found.</h1>
+          <p>The link may be incorrect, or this profile has been removed.</p>
+          <Link to="/" className="btn btn--primary">Back to home</Link>
         </div>
       </div>
     )
@@ -45,7 +45,7 @@ function Profile() {
             <span className="brand__mark"><span className="brand__dot" /></span>
             <span className="brand__name">pili<span>Pilinas</span></span>
           </Link>
-          <Link to="/" className="profile-header__back">← Bumalik sa home</Link>
+          <Link to="/" className="profile-header__back">← Back to home</Link>
         </div>
       </header>
 
@@ -69,8 +69,8 @@ function Profile() {
 
         <div className="profile-note">
           <p>
-            Ang detalyadong voting record, SALN, at promise tracker para kay{' '}
-            <strong>{official.name}</strong> ay malapit nang idagdag dito.
+            Detailed voting records, SALN, and promise tracker for{' '}
+            <strong>{official.name}</strong> are coming soon.
           </p>
         </div>
       </div>

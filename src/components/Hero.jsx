@@ -21,11 +21,11 @@ function Hero({ query, onSearch }) {
         </div>
 
         <h1 className="hero__title">
-          Alamin kung sino<br />talaga ang <span>ihahalal</span> mo.
+          Know who you're<br />really <span>voting for</span>.
         </h1>
         <p className="hero__subtitle">
-          Track records, voting history, at mga pangako ng bawat politiko — nasa
-          isang lugar lang. Mag-research muna bago mag-vote.
+          Track records, voting history, and every politician's promises — all in
+          one place. Do your research before you vote.
         </p>
 
         <div className="hero__search">
@@ -34,18 +34,18 @@ function Hero({ query, onSearch }) {
             <input
               value={query}
               onChange={onSearch}
-              placeholder="Hanapin ang senador, mayor, o congressman…"
+              placeholder="Search for a senator, mayor, or congressman…"
               className="search-bar__input"
               aria-label="Search officials"
             />
-            <button className="btn btn--primary">Hanapin</button>
+            <button className="btn btn--primary">Search</button>
           </div>
-          <p className="hero__hint">Libre at walang bias. 100% mula sa public records.</p>
+          <p className="hero__hint">Free and unbiased. 100% from public records.</p>
 
           <div className="hero__angkenator">
-            <span>Hindi sigurado kung sino?</span>
+            <span>Not sure who to pick?</span>
             <a href="Angkenator.dc.html" className="btn btn--ghost">
-              🎯 Subukan ang Angkenator →
+              🎯 Try the Angkenator →
             </a>
           </div>
         </div>

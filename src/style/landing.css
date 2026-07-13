@@ -223,6 +223,7 @@
   transform: translateY(-2px);
 }
 .official-card__photo {
+  position: relative;
   height: 132px;
   border-radius: 10px;
   background: repeating-linear-gradient(135deg, #eef1f5, #eef1f5 9px, #e5eaf1 9px, #e5eaf1 18px);
@@ -230,6 +231,19 @@
   align-items: flex-end;
   padding: 9px;
   margin-bottom: 14px;
+}
+.official-card__ballot {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 13px;
+  color: #fff;
+  background: var(--blue);
+  padding: 3px 9px;
+  border-radius: 6px;
+  letter-spacing: 0.01em;
 }
 .official-card__photo span {
   font-family: ui-monospace, 'SF Mono', Menlo, monospace;

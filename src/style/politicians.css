@@ -1,0 +1,128 @@
+/* ============================================================
+   piliPilinas — Politicians browse page
+   ============================================================ */
+.browse {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 48px 32px 80px;
+}
+.browse__head { margin-bottom: 26px; }
+.browse__title {
+  font-family: var(--font-head);
+  font-weight: 800;
+  font-size: 36px;
+  letter-spacing: -0.025em;
+  margin: 0 0 8px;
+  color: var(--ink);
+}
+.browse__subtitle {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted-2);
+  margin: 0;
+  max-width: 640px;
+}
+
+/* ---------- Filters ---------- */
+.filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 4px 20px rgba(11, 27, 58, 0.04);
+}
+.filters__search {
+  flex: 2;
+  min-width: 220px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  border: 1.5px solid var(--border-input);
+  border-radius: 9px;
+  padding: 11px 14px;
+}
+.filters__search:focus { outline: none; border-color: var(--blue); }
+.filters__select {
+  flex: 1;
+  min-width: 170px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  border: 1.5px solid var(--border-input);
+  border-radius: 9px;
+  padding: 11px 14px;
+  background: #fff;
+  cursor: pointer;
+}
+.filters__select:focus { outline: none; border-color: var(--blue); }
+.filters__clear {
+  border: none;
+  background: transparent;
+  color: var(--blue);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 11px 8px;
+  cursor: pointer;
+}
+.filters__clear:hover { text-decoration: underline; }
+
+.browse__count {
+  font-size: 13.5px;
+  color: var(--muted);
+  margin: 20px 0 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Pagination ---------- */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 36px;
+  flex-wrap: wrap;
+}
+.pager__pages { display: flex; gap: 6px; flex-wrap: wrap; }
+.pager__num {
+  min-width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.pager__num:hover { border-color: var(--blue); color: var(--blue); }
+.pager__num.is-active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+.pager__btn {
+  border: 1.5px solid var(--border);
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  padding: 0 16px;
+  height: 38px;
+  border-radius: 9px;
+  cursor: pointer;
+}
+.pager__btn:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+.pager__btn:disabled { color: #c2c9d4; cursor: not-allowed; }
+
+@media (max-width: 560px) {
+  .browse { padding: 32px 20px 60px; }
+  .filters__search, .filters__select { flex: 1 1 100%; }
+}
