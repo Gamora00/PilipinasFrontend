@@ -6,6 +6,7 @@ import Register from './pages/register'
 import Profile from './pages/profile'
 import Admin from './pages/admin'
 import AdminSignup from './pages/adminSignup'
+import ForgotPassword from './pages/forgotPassword'
 import './App.css'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path="/admin/signup" element={<AdminSignup />} />
         {/* Candidacy registration is an admin-only action. */}
         <Route path="/admin/register" element={<Register />} />
+        <Route path="/admin/login/forgot-password" element={<ForgotPassword />} />
       </Routes>
     </BrowserRouter>
   )
